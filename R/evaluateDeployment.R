@@ -88,7 +88,7 @@ evaluateDeployment <- function(dir,
     # add option that dir can be multiple if XML and wav not same main folder
 
     # wav, log.xml, these are only file types we currently allow
-    exts <- '\\.wav|\\.log\\.xml'
+    exts <- '\\.wav|\\.flac|\\.log\\.xml'
     if(any(!dir.exists(dir))) {
         warning('Folder ', printN(dir[!dir.exists(dir)]), ' does not exist')
         return(NULL)
@@ -170,18 +170,24 @@ evaluateDeployment <- function(dir,
         list.files(x, pattern=exts, full.names=TRUE, recursive=FALSE)
     }))
     isWav <- grepl('\\.wav$', allFiles)
-    if(!any(isWav)) {
-        warning('No wav files found in folder ', dir, immediate. = TRUE)
+    isFlac <- grepl('\\.flac$', allFiles)
+    if(!any(isWav) & !any(isFlac)) {
+        warning('No wav or flac files found in folder ', dir, immediate. = TRUE)
         return(NULL)
     }
-    wavFiles <- allFiles[isWav]
+    if (any(isWav)){
+      wavFiles <- allFiles[isWav]
+    } else if (any(isFlac)) {
+      wavFiles <- allFiles[isFlac]      
+    }
     if(!is.null(subDirPattern)) {
         wavBase <- unique(dirname(wavFiles))
         if(length(wavBase) > 1) {
-            warning('More than 1 folder of wav files was found within folder ',
+            warning('More than 1 folder of audio files was found within folder ',
                     dir, ' using subDirPattern ', subDirPattern, immediate.=TRUE)
         }
     }
+
     isLog <- grepl('\\.log\\.xml', allFiles)
     logFiles <- allFiles[isLog]
 
